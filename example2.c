@@ -10,7 +10,7 @@ typedef struct Node {
 
 //implementarea unei structuri de tip graf care utilizeaza struct nod
 typedef struct Graph {
-    int vertices;
+    int vertex;
     int *visited;
     struct Node **adjacency_lists;
 } GPH;
@@ -24,12 +24,12 @@ NODE *create_node(int v) {
 }
 
 //functie pt initializarea grafului
-GPH *create_graph(int vertices) {
+GPH *create_graph(int vertex_nr) {
     GPH *graph = malloc(sizeof(GPH));
-    graph->vertices = vertices;
-    graph->adjacency_lists = malloc(vertices * sizeof(NODE *));
-    graph->visited = malloc(sizeof(int) * vertices);
-    for (int i = 0; i < vertices; i++) {
+    graph->vertex = vertex_nr;
+    graph->adjacency_lists = malloc(vertex_nr * sizeof(NODE *));
+    graph->visited = malloc(sizeof(int) * vertex_nr);
+    for (int i = 0; i < vertex_nr; i++) {
         graph->adjacency_lists[i] = NULL;
         graph->visited[i] = 0;
     }
@@ -48,10 +48,10 @@ void add_edge(GPH *graph, int src, int dest) {
 }
 
 //inserarea muchiilor de la tastatura
-void insert_edge(int nr_of_vertices, int nr_of_edges, GPH *graph) {
+void insert_edge(int vertex_nr, int edge_nr, GPH *graph) {
     int src, dest;
-    printf("Introduceti %d muchii (de la 0 la %d):\n", nr_of_edges, nr_of_vertices - 1);
-    for (int i = 0; i < nr_of_edges; i++) {
+    printf("Introduceti %d muchii (de la 0 la %d):\n", edge_nr, vertex_nr - 1);
+    for (int i = 0; i < edge_nr; i++) {
         scanf("%d%d", &src, &dest);
         add_edge(graph, src, dest);
     }
@@ -83,7 +83,7 @@ int dequeue(NODE **queue) {
 }
 
 void print_graph(GPH *graph) {
-    for (int i = 0; i < graph->vertices; i++) {
+    for (int i = 0; i < graph->vertex; i++) {
         NODE *temp = graph->adjacency_lists[i];
         printf("%d: ", i);
         while (temp) {
@@ -102,8 +102,8 @@ void print_queue(NODE *queue) {
     printf("\n");
 }
 
-void wipe_visited_list(GPH *graph, int nr_of_vertices) {
-    for (int i = 0; i < nr_of_vertices; i++) {
+void wipe_visited_list(GPH *graph, int vertex_nr) {
+    for (int i = 0; i < vertex_nr; i++) {
         graph->visited[i] = 0;
     }
 }
@@ -145,27 +145,38 @@ void BFS(GPH *graph, int start) {
         }
     }
 }
+void free_graph(GPH *graph) {
+    for (int i = 0; i < graph->vertex; i++) {
+        NODE *temp = graph->adjacency_lists[i];
+        while (temp != NULL) {
+            NODE *next = temp->next;
+            free(temp);
+            temp = next;
+        }
+    }
+    free(graph->adjacency_lists);
+    free(graph->visited);
+    free(graph);
+}
 
 int main() {
-    int nr_of_vertices;
-    int nr_of_edges;
-    int starting_vertex;
+    int vertex_nr, edge_nr, starting_vertex;
 
     printf("Introduceti nr de noduri al grafului: ");
-    scanf("%d", &nr_of_vertices);
+    scanf("%d", &vertex_nr);
 
     printf("Introduceti nr de muchii ale grafului: ");
-    scanf("%d", &nr_of_edges);
+    scanf("%d", &edge_nr);
 
-    GPH *graph = create_graph(nr_of_vertices);
-    insert_edge(nr_of_vertices, nr_of_edges, graph);
+    GPH *graph = create_graph(vertex_nr);
+    insert_edge(vertex_nr, edge_nr, graph);
 
     printf("Introduceti nodul de start pentru parcurgerea DFS: ");
     scanf("%d", &starting_vertex);
     printf("Parcurgere cu DFS: ");
     DFS(graph, starting_vertex);
 
-    wipe_visited_list(graph, nr_of_vertices);
+    wipe_visited_list(graph, vertex_nr);
     printf("\n");
 
     printf("Introduceti nodul de start pentru parcurgerea BFS: ");
@@ -173,6 +184,7 @@ int main() {
     printf("Parcurgere cu BFS: ");
     BFS(graph, starting_vertex);
     printf("\n");
+    free_graph(graph);
 
     return 0;
 }
